@@ -26,9 +26,9 @@ Route::get('/', function () {
 })->name('home');
 
 // 🔒 Autenticación Nativa de Laravel
-Route::post('/login', [AuthController::class, 'handleLogin'])->name('login');
-Route::post('/register', [AuthController::class, 'handleRegister'])->name('register');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/login', [AuthController::class, 'handleLogin'])->name('login.submit');
+Route::post('/register', [AuthController::class, 'handleRegister'])->name('register.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout.submit');
 
 // 🌐 Autenticación Social (Google OAuth)
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');

@@ -78,7 +78,7 @@
                     @endif
                 </button>
                 <span class="nav-user-email" style="color:var(--white80); font-size:13px; font-weight:600; margin:0 10px;">👤 {{ explode('@', auth()->user()->email)[0] }}</span>
-                <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                <form action="{{ route('logout.submit') }}" method="POST" style="display: inline;">
                     @csrf
                     <button type="submit" class="btn btn-outline btn-sm" style="padding: 6px 12px;">
                         <span class="hide-mobile">🔒 Salir</span>
@@ -331,7 +331,7 @@
             };
 
             try {
-                const response = await fetch("{{ route('login') }}", {
+                const response = await fetch("{{ route('login.submit') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -372,7 +372,7 @@
             };
 
             try {
-                const response = await fetch("{{ route('register') }}", {
+                const response = await fetch("{{ route('register.submit') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
