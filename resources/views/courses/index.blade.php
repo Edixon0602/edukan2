@@ -6,26 +6,25 @@
 <div class="max-w-6xl mx-auto px-6 py-12" x-data="coursesCatalog()">
     <!-- Header -->
     <div class="mb-10">
-        <span class="font-display text-[10px] text-[#00f2fe] font-black tracking-wider uppercase block mb-1">Catálogo Completo</span>
         <h2 class="font-display font-black text-3xl text-white">Nuestros <span class="text-brand-accent">Cursos Premium</span></h2>
     </div>
     
-    <!-- Filters Bar -->
-    <div class="flex gap-2.5 flex-wrap mb-8">
-        <button :class="activeCategory === 'todos' ? 'bg-brand-accent text-white shadow-neon-blue border-brand-accent/20' : 'bg-white/5 text-white/70 border-white/5 hover:bg-white/10 hover:text-white'" class="border px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer" @click="filterCategory('todos')">Todos</button>
+    <!-- Filters Bar (Flat tabs) -->
+    <div class="flex gap-4 border-b border-gray-800 pb-1 mb-8 overflow-x-auto scrollbar-none">
+        <button :class="activeCategory === 'todos' ? 'text-white border-b-2 border-brand-accent font-bold pb-2' : 'text-white/60 hover:text-white pb-2'" class="text-xs font-bold uppercase tracking-wider transition-all cursor-pointer" @click="filterCategory('todos')">Todos</button>
         @foreach($categories as $cat)
-            <button :class="activeCategory === '{{ $cat->id }}' ? 'bg-brand-accent text-white shadow-neon-blue border-brand-accent/20' : 'bg-white/5 text-white/70 border-white/5 hover:bg-white/10 hover:text-white'" class="border px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer" @click="filterCategory('{{ $cat->id }}')">{{ $cat->name }}</button>
+            <button :class="activeCategory === '{{ $cat->id }}' ? 'text-white border-b-2 border-brand-accent font-bold pb-2' : 'text-white/60 hover:text-white pb-2'" class="text-xs font-bold uppercase tracking-wider transition-all cursor-pointer" @click="filterCategory('{{ $cat->id }}')">{{ $cat->name }}</button>
         @endforeach
     </div>
     
     <!-- Courses Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         @foreach($courses as $course)
-            <div class="bg-brand-dark2 border border-white/5 hover:border-[#00f2fe]/20 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl hover:-translate-y-1" x-show="activeCategory === 'todos' || activeCategory === '{{ $course->category_id }}'">
+            <div class="bg-brand-dark2 border border-gray-800 hover:border-gray-700 rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 shadow-xl" x-show="activeCategory === 'todos' || activeCategory === '{{ $course->category_id }}'">
                 <div>
                     <!-- Flyer wrapper -->
                     <div class="aspect-video w-full rounded-xl overflow-hidden bg-brand-dark relative">
-                        <img src="{{ $course->flyer_path ? asset('storage/' . $course->flyer_path) : 'https://via.placeholder.com/300' }}" class="w-full h-full object-cover">
+                        <img src="{{ $course->flyer_path ? $course->flyer_path : 'https://via.placeholder.com/300' }}" class="w-full h-full object-cover">
                     </div>
                     
                     <!-- Title -->
@@ -42,15 +41,15 @@
                 </div>
                 
                 <!-- Footer -->
-                <div class="flex justify-between items-center border-t border-white/5 pt-4 mt-auto">
+                <div class="flex justify-between items-center border-t border-gray-800 pt-4 mt-auto">
                     <span class="font-display font-black text-brand-gold text-base">${{ $course->price }}</span>
                     @auth
-                        <button class="bg-brand-accent hover:bg-brand-accent/90 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all shadow-neon-blue cursor-pointer" @click="evaluateEntry('{{ $course->id }}', '{{ $course->title }}', '{{ $course->price }}', '{{ auth()->user()->membership }}', '{{ $course->required_membership }}')">
-                            Ingresar →
+                        <button class="bg-brand-accent hover:bg-brand-accent/90 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all cursor-pointer" @click="evaluateEntry('{{ $course->id }}', '{{ $course->title }}', '{{ $course->price }}', '{{ auth()->user()->membership }}', '{{ $course->required_membership }}')">
+                            Ingresar
                         </button>
                     @else
-                        <button class="bg-brand-accent hover:bg-brand-accent/90 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all shadow-neon-blue cursor-pointer" onclick="openAuthModal('login')">
-                            Ingresar →
+                        <button class="bg-brand-accent hover:bg-brand-accent/90 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all cursor-pointer" onclick="openAuthModal('login')">
+                            Ingresar
                         </button>
                     @endauth
                 </div>

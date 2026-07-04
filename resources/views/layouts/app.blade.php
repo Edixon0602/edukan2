@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth" :class="isDark ? 'dark' : ''" x-data="{ isDark: localStorage.getItem('theme') !== 'light', init() { $watch('isDark', val => localStorage.setItem('theme', val ? 'dark' : 'light')) } }">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,14 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
     
+    <script>
+        if (localStorage.getItem('theme') !== 'light') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     @vite(['resources/css/app.css'])
     
     <link rel="manifest" href="/manifest.json">
@@ -19,13 +27,11 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    @livewireStyles
 </head>
-<body class="min-h-screen flex flex-col justify-between transition-colors duration-200" :class="isDark ? 'bg-brand-dark text-white' : 'bg-gray-50 text-gray-900'">
+<body class="min-h-screen flex flex-col justify-between transition-colors duration-200 bg-gray-50 text-gray-900 dark:bg-brand-dark dark:text-white" x-data="{ isDark: localStorage.getItem('theme') !== 'light' }">
 
     <!-- Notification Toast -->
-    <div id="global-notification" class="fixed top-24 right-6 transform translate-x-80 opacity-0 bg-brand-dark2/90 border border-brand-accent/20 backdrop-blur-md px-5 py-4 rounded-xl flex items-center gap-3 shadow-2xl transition-all duration-300 z-[999999]">
-        <span id="global-notif-icon" class="text-xl">✅</span>
+    <div id="global-notification" class="fixed top-24 right-6 transform translate-x-80 opacity-0 bg-brand-dark2 border border-gray-800 px-5 py-4 rounded-xl flex items-center gap-3 shadow-2xl transition-all duration-300 z-[999999]">
         <span id="global-notif-text" class="text-sm font-semibold text-white">Acción completada exitosamente</span>
     </div>
 
@@ -47,8 +53,8 @@
     @include('layouts.partials.footer')
 
     <!-- Auth Modal (Login / Register) -->
-    <div class="fixed inset-0 bg-brand-dark/80 backdrop-blur-md flex items-center justify-center z-[99999] opacity-0 pointer-events-none transition-all duration-300" id="auth-modal">
-        <div class="bg-brand-dark2 border border-brand-accent/20 p-8 rounded-2xl w-full max-w-md shadow-2xl relative">
+    <div class="fixed inset-0 bg-brand-dark/90 flex items-center justify-center z-[99999] opacity-0 pointer-events-none transition-all duration-300" id="auth-modal">
+        <div class="bg-brand-dark2 border border-gray-800 p-8 rounded-2xl w-full max-w-md shadow-2xl relative">
             <button class="absolute top-4 right-4 text-white/50 hover:text-white text-lg cursor-pointer" onclick="closeAuthModal()">✕</button>
             <h3 class="font-display font-black text-xl text-white mb-2" id="auth-modal-title">Bienvenido de Vuelta</h3>
             <p class="text-brand-text-muted text-xs mb-6" id="auth-modal-sub">Accede a tu cuenta y continúa aprendiendo</p>
@@ -69,8 +75,8 @@
                         <label class="text-xs font-bold text-white/70">Contraseña</label>
                         <input type="password" name="password" id="login-pass" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-white/30 focus:border-brand-accent focus:outline-none" required placeholder="••••••••">
                     </div>
-                    <button type="submit" class="w-full bg-brand-accent hover:bg-brand-accent/90 text-white font-bold py-3 rounded-lg text-sm transition-all shadow-neon-blue mt-2 cursor-pointer">
-                        Entrar a la Academia →
+                    <button type="submit" class="w-full bg-brand-accent hover:bg-brand-accent/90 text-white font-bold py-3 rounded-lg text-sm transition-all mt-2 cursor-pointer">
+                        Entrar a la Academia
                     </button>
                     <p class="text-center text-xs text-brand-text-muted mt-2">
                         ¿Olvidaste tu contraseña? <a href="#" class="text-brand-accent font-semibold hover:underline" onclick="alert('Funcionalidad de recuperación en desarrollo')">Recupérala aquí</a>
@@ -146,8 +152,8 @@
                         </select>
                     </div>
                     
-                    <button type="submit" class="w-full bg-[#111423] border border-brand-accent/30 hover:border-brand-accent text-white font-bold py-2.5 rounded-lg text-sm transition-all mt-2 cursor-pointer">
-                        Crear Mi Cuenta →
+                    <button type="submit" class="w-full bg-[#111423] border border-gray-800 hover:border-brand-accent text-white font-bold py-2.5 rounded-lg text-sm transition-all mt-2 cursor-pointer">
+                        Crear Mi Cuenta
                     </button>
                 </form>
             </div>
@@ -166,57 +172,140 @@
         </div>
     </div>
 
-    @livewireScripts
     <!-- Global Javascript Logic -->
     <script>
         // CSRF Token Setup for Axios / Fetch
         window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Theme Toggle trigger Alpine
-        function toggleTheme() {
-            const current = localStorage.getItem('theme') || 'dark';
-            const next = current === 'light' ? 'dark' : 'light';
-            localStorage.setItem('theme', next);
-            
-            // Dispatch to Alpine instance
-            const app = document.querySelector('[x-data]');
-            if (app) {
-                app.__x.$data.isDark = (next === 'dark');
-            }
-            showGlobalNotification(next === 'dark' ? '🌙 Modo Noche Activado' : '☀️ Modo Día Activado');
-        }
 
-        // Livewire SPA Page transitions (wire:navigate)
-        document.addEventListener('livewire:navigate', () => {
+
+        // 🌓 Vanilla Dark/Light Mode toggle handler (delegated)
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#theme-toggle-btn');
+            if (!btn) return;
+            
+            const isCurrentlyDark = document.documentElement.classList.contains('dark');
+            const nextDark = !isCurrentlyDark;
+            
+            if (nextDark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+            
+            showGlobalNotification(nextDark ? 'Modo Oscuro Activado' : 'Modo Claro Activado');
+            
+            // Sync with Alpine state on the body if it exists
+            if (window.Alpine) {
+                const bodyData = Alpine.$data(document.body);
+                if (bodyData) {
+                    bodyData.isDark = nextDark;
+                }
+            }
+        });
+
+        // 🚀 Custom SPA Router & Page transitions
+        document.addEventListener('click', async (e) => {
+            const link = e.target.closest('a');
+            if (!link) return;
+            
+            // Check if it's an internal link
+            const url = new URL(link.href, window.location.href);
+            if (url.origin !== window.location.origin) return;
+            
+            // Skip target="_blank" or download links
+            if (link.getAttribute('target') === '_blank' || link.hasAttribute('download')) return;
+            
+            // Skip standard hash links on the same page
+            if (url.pathname === window.location.pathname && url.hash) return;
+            
+            e.preventDefault();
+            await navigateTo(url.href);
+        });
+
+        async function navigateTo(url, addToHistory = true) {
             const content = document.getElementById('main-content-wrapper');
             const skeleton = document.getElementById('global-skeleton-loader');
+            
             if (content && skeleton) {
                 content.classList.add('hidden');
                 skeleton.classList.remove('hidden');
             }
-        });
-
-        document.addEventListener('livewire:navigated', () => {
-            const content = document.getElementById('main-content-wrapper');
-            const skeleton = document.getElementById('global-skeleton-loader');
-            if (content && skeleton) {
-                skeleton.classList.add('hidden');
-                content.classList.remove('hidden');
-            }
             
-            // Re-bind CSRF tokens and clean modales after navigation
-            window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            closeAuthModal();
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Response error');
+                
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                
+                // Update Title
+                document.title = doc.title;
+                
+                // Update Content
+                const newContent = doc.getElementById('main-content-wrapper');
+                if (newContent && content) {
+                    content.innerHTML = newContent.innerHTML;
+                }
+                
+                // Update URL History
+                if (addToHistory) {
+                    history.pushState(null, '', url);
+                }
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+                
+                // Re-execute scripts inside the new content
+                const scripts = content.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+                
+                // Re-bind CSRF token
+                window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                closeAuthModal();
+                
+                // Re-initialize Alpine elements
+                if (window.Alpine) {
+                    window.Alpine.initTree(content);
+                }
+                
+            } catch (error) {
+                if (!addToHistory) {
+                    window.location.href = url;
+                }
+            } finally {
+                if (content && skeleton) {
+                    skeleton.classList.add('hidden');
+                    content.classList.remove('hidden');
+                }
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            navigateTo(window.location.href, false);
         });
 
         // Notifications Helper
         function showGlobalNotification(text, isError = false) {
             const toast = document.getElementById('global-notification');
-            const icon = document.getElementById('global-notif-icon');
             const txt = document.getElementById('global-notif-text');
             if (toast) {
-                icon.textContent = isError ? '⚠️' : '✅';
                 txt.textContent = text;
+                if (isError) {
+                    toast.classList.remove('border-gray-800');
+                    toast.classList.add('border-red-900');
+                } else {
+                    toast.classList.remove('border-red-900');
+                    toast.classList.add('border-gray-800');
+                }
                 toast.classList.remove('translate-x-80', 'opacity-0');
                 toast.classList.add('translate-x-0', 'opacity-100');
                 setTimeout(() => {
