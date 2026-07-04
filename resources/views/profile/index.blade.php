@@ -3,207 +3,201 @@
 @section('title', 'Mi Perfil — Edukan2')
 
 @section('content')
-<div id="section-profile" class="page-section visible" style="padding-top: 40px;" x-data="profileEngine()">
-    <div class="section-wrapper" style="max-width: 1200px; margin: 0 auto;">
-      
-        <!-- Profile Header Box -->
-        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 40px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 30px;">
-            <div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
-                <div id="profile-avatar-container" style="width: 120px; height: 120px; min-width: 120px; border-radius: 50%; background: var(--dark2); border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; color: white; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
-                    @if($user->avatar_path)
-                        <img src="{{ asset('storage/' . $user->avatar_path) }}" style="width:100%; height:100%; object-fit:cover;">
-                    @else
-                        <span>{{ strtoupper(substr($user->name, 0, 1)) }}</span>
-                    @endif
-                </div>
-                <div>
-                    <h2 style="color: white; font-size: 28px; font-weight: 800; margin: 0;">{{ $user->name }}</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; margin: 4px 0 0 0;">{{ $user->email }}</p>
-                    <p style="color: var(--accent); font-size: 12px; font-weight: bold; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px;">✓ Alumno Certificado</p>
-                    <button @click="openConfigModal()" class="btn btn-outline btn-sm" style="margin-top: 16px; font-size: 12px; padding: 8px 20px; border-radius: 8px;">⚙️ Editar Mi Perfil</button>
-                </div>
+<div class="max-w-6xl mx-auto px-6 py-10" x-data="profileEngine()">
+    <!-- Profile Header Box -->
+    <div class="bg-brand-dark2 border border-white/5 rounded-3xl p-8 sm:p-10 mb-8 flex flex-col md:flex-row justify-between items-center gap-8 shadow-2xl">
+        <div class="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center text-center sm:text-left">
+            <div class="w-28 h-28 min-w-[112px] rounded-full bg-brand-dark border-4 border-brand-accent flex items-center justify-center text-4xl font-bold text-white overflow-hidden shadow-2xl">
+                @if($user->avatar_path)
+                    <img src="{{ asset('storage/' . $user->avatar_path) }}" class="w-full h-full object-cover">
+                @else
+                    <span>{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                @endif
             </div>
-            
-            <!-- Rango / Membership visual card -->
-            <div style="padding: 25px 35px; border-radius: 16px; display: flex; flex-direction: column; justify-content: center; min-width: 250px; text-align: center;" :style="getMembershipStyle('bg')">
-                <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Plan de Acceso Actual</div>
-                <h3 style="font-size: 22px; font-weight: 900; margin: 8px 0 0 0;" :style="getMembershipStyle('text')" x-text="getMembershipName()">Miembro Regular</h3>
-                <a href="{{ route('memberships.index') }}" class="btn btn-primary btn-sm" style="margin-top: 15px; width: 100%; justify-content: center; text-decoration: none;">⭐ Mejorar Membresía</a>
+            <div class="flex flex-col">
+                <h2 class="text-white text-3xl font-black mb-1 leading-tight tracking-tight">{{ $user->name }}</h2>
+                <p class="text-brand-text-muted text-sm mb-2">{{ $user->email }}</p>
+                <p class="text-brand-accent text-xs font-bold uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1">✓ Alumno Certificado</p>
+                <button @click="configModalOpen = true" class="border border-white/10 hover:bg-white/5 text-white text-xs font-bold px-4 py-2.5 rounded-lg mt-4 cursor-pointer transition-all w-fit mx-auto sm:mx-0">⚙️ Editar Mi Perfil</button>
             </div>
         </div>
-  
-        <!-- Sub-tabs Navigation -->
-        <div style="display: flex; gap: 12px; margin-bottom: 30px; border-bottom: 2px solid rgba(255,255,255,0.05); padding-bottom: 12px; overflow-x: auto;">
-            <button :class="{ 'active': activeTab === 'ruta' }" class="admin-tab" @click="activeTab = 'ruta'">🛣️ Mis Cursos</button>
-            <button :class="{ 'active': activeTab === 'stats' }" class="admin-tab" @click="openStatsTab()">📈 Mi Rendimiento</button>
-            <button :class="{ 'active': activeTab === 'logros' }" class="admin-tab" @click="activeTab = 'logros'">🏆 Mis Logros</button>
-            <button :class="{ 'active': activeTab === 'notif' }" class="admin-tab" @click="activeTab = 'notif'">🔔 Alertas</button>
+        
+        <!-- Rango / Membership visual card -->
+        <div class="p-6 rounded-2xl flex flex-col justify-center text-center min-w-[260px] shadow-2xl" :style="getMembershipStyle('bg')">
+            <div class="text-[10px] text-brand-text-muted font-bold uppercase tracking-wider">Plan de Acceso Actual</div>
+            <h3 class="text-xl font-black mt-2 leading-none" :style="getMembershipStyle('text')" x-text="getMembershipName()">Miembro Regular</h3>
+            <a href="{{ route('memberships.index') }}" wire:navigate class="bg-brand-accent hover:bg-brand-accent/90 text-white font-bold py-2.5 rounded-lg text-xs mt-4 shadow-neon-blue transition-all no-underline inline-block">⭐ Mejorar Membresía</a>
         </div>
-  
-        <!-- 1. TAB: MIS CURSOS -->
-        <div x-show="activeTab === 'ruta'" style="display: block;">
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-                @foreach($enrolledCourses as $idx => $course)
-                    <div style="background: var(--dark2); border: 1px solid var(--border); border-radius: 12px; overflow:hidden; margin-bottom: 5px;">
-                        
-                        <div @click="toggleAccordion('{{ $idx }}')" style="cursor:pointer; padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; background:rgba(255,255,255,0.01);">
-                            <div>
-                                <span style="font-size: 9px; font-weight: bold; text-transform: uppercase; color: var(--accent); background: rgba(255,255,255,0.02); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border);">
-                                    {{ $course->category->name ?? 'General' }}
-                                </span>
-                                <h4 style="color: white; font-size: 15px; font-weight: 700; margin: 8px 0 2px 0;">
-                                    {{ $course->title }} <span style="color:var(--accent); font-size:12px; margin-left:6px; font-weight:normal;">▼ (Ver Clases)</span>
-                                </h4>
-                            </div>
-                            <div @click.stop>
-                                @if($course->is_completed)
-                                    <div style="display:flex; gap:6px;">
-                                        <a href="{{ route('courses.player', $course->id) }}" class="btn btn-outline btn-sm" style="padding: 6px 12px; font-size: 11px; text-decoration: none;">Repasar</a>
-                                        <!-- Certificado generation local -->
-                                        <a href="{{ route('profile.certificate', $course->id) }}" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; padding: 6px 14px; font-size: 11px; font-weight: bold; background:var(--success); color:white; border:none; border-radius:6px; box-shadow: 0 0 10px rgba(0, 229, 160, 0.4);">
-                                            📜 Descargar Certificado
-                                        </a>
-                                    </div>
-                                @else
-                                    <a href="{{ route('courses.player', $course->id) }}" class="btn btn-primary btn-sm" style="padding: 8px 16px; font-size: 11px; font-weight: 700; text-decoration: none; display: inline-block;">
-                                        ▶️ Continuar Estudio
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
+    </div>
 
-                        <!-- Progress Bar -->
-                        <div style="padding: 0 20px 25px 20px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
-                                <span>Progreso en esta asignatura</span>
-                                <span style="font-weight: bold;" :style="'color: ' + ({{ $course->is_completed ? 'true' : 'false' }} ? 'var(--success)' : 'var(--accent)')">{{ $course->progress_percent }}%</span>
-                            </div>
-                            <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.04); border-radius: 100px; overflow: hidden;">
-                                <div style="width: {{ $course->progress_percent }}%; height: 100%; border-radius: 100px; transition: width 0.5s ease;" :style="'background: ' + ({{ $course->is_completed ? 'true' : 'false' }} ? 'var(--success)' : 'var(--accent)')"></div>
-                            </div>
-                        </div>
+    <!-- Sub-tabs Navigation -->
+    <div class="flex gap-2 mb-8 border-b border-white/5 pb-1 overflow-x-auto scrollbar-none">
+        <button :class="activeTab === 'ruta' ? 'text-white border-b-2 border-brand-accent font-bold' : 'text-white/50 hover:text-white'" class="pb-3 px-4 text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer transition-all" @click="activeTab = 'ruta'">🛣️ Mis Cursos</button>
+        <button :class="activeTab === 'stats' ? 'text-white border-b-2 border-brand-accent font-bold' : 'text-white/50 hover:text-white'" class="pb-3 px-4 text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer transition-all" @click="openStatsTab()">📈 Mi Rendimiento</button>
+        <button :class="activeTab === 'logros' ? 'text-white border-b-2 border-brand-accent font-bold' : 'text-white/50 hover:text-white'" class="pb-3 px-4 text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer transition-all" @click="activeTab = 'logros'">🏆 Mis Logros</button>
+        <button :class="activeTab === 'notif' ? 'text-white border-b-2 border-brand-accent font-bold' : 'text-white/50 hover:text-white'" class="pb-3 px-4 text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer transition-all" @click="activeTab = 'notif'">🔔 Alertas</button>
+    </div>
 
-                        <!-- Accordion Temario details -->
-                        <div id="accordion-{{ $idx }}" style="display:none; background: rgba(0,0,0,0.15); border-top:1px solid rgba(255,255,255,0.03); padding:15px 20px;">
-                            <div style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:8px;">Plan de Clases Detallado:</div>
-                            @foreach($course->modules as $mod)
-                                @foreach($mod->lessons as $lesson)
-                                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.02); font-size:12px;">
-                                        <span style="color:var(--white80);"> Lección: {{ $lesson->title }}</span>
-                                        <span style="font-size:11px; font-weight:bold;" :style="'color: ' + ({{ $course->is_completed ? 'true' : 'false' }} ? 'var(--success)' : 'var(--accent)')">
-                                            {{ $course->is_completed ? '✓ Completada' : '⏱️ Pendiente' }}
-                                        </span>
-                                    </div>
-                                @endforeach
+    <!-- 1. TAB: MIS CURSOS -->
+    <div x-show="activeTab === 'ruta'" class="flex flex-col gap-5">
+        @forelse($enrolledCourses as $idx => $course)
+            <div class="bg-brand-dark2 border border-white/5 rounded-2xl overflow-hidden shadow-xl">
+                <div @click="toggleAccordion('{{ $idx }}')" class="cursor-pointer p-6 flex justify-between items-center gap-6 flex-wrap bg-white/[0.01] hover:bg-white/[0.02] transition-all">
+                    <div>
+                        <span class="text-[9px] font-bold uppercase text-brand-accent bg-brand-accent/10 border border-brand-accent/20 px-2 py-0.5 rounded-full">
+                            {{ $course->category->name ?? 'General' }}
+                        </span>
+                        <h4 class="text-white text-base font-bold mt-2">
+                            {{ $course->title }} <span class="text-brand-accent text-xs ml-1.5 font-normal">▼ (Ver Clases)</span>
+                        </h4>
+                    </div>
+                    <div @click.stop class="flex gap-2">
+                        @if($course->is_completed)
+                            <a href="{{ route('courses.player', $course->id) }}" wire:navigate class="border border-white/10 hover:bg-white/5 text-white text-xs font-bold px-3 py-2 rounded-lg no-underline transition-all">Repasar</a>
+                            <a href="{{ route('profile.certificate', $course->id) }}" target="_blank" class="bg-brand-success hover:bg-brand-success/90 text-white text-xs font-bold px-4 py-2 rounded-lg no-underline transition-all shadow-neon-gold">
+                                📜 Certificado
+                            </a>
+                        @else
+                            <a href="{{ route('courses.player', $course->id) }}" wire:navigate class="bg-brand-accent hover:bg-brand-accent/90 text-white text-xs font-bold px-4 py-2.5 rounded-lg no-underline transition-all shadow-neon-blue">
+                                ▶️ Continuar
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="px-6 pb-6">
+                    <div class="flex justify-between text-xs text-brand-text-muted mb-2 font-bold">
+                        <span>Progreso en esta asignatura</span>
+                        <span class="font-bold" :class="{{ $course->is_completed ? 'true' : 'false' }} ? 'text-brand-success' : 'text-brand-accent'">{{ $course->progress_percent }}%</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-500" :class="{{ $course->is_completed ? 'true' : 'false' }} ? 'bg-brand-success' : 'bg-brand-accent'" style="width: {{ $course->progress_percent }}%"></div>
+                    </div>
+                </div>
+
+                <!-- Accordion Temario details -->
+                <div id="accordion-{{ $idx }}" class="hidden bg-black/20 border-t border-white/5 p-6">
+                    <div class="text-[10px] text-brand-text-muted font-bold uppercase tracking-wider mb-3">Plan de Clases Detallado:</div>
+                    <div class="flex flex-col gap-1">
+                        @foreach($course->modules as $mod)
+                            @foreach($mod->lessons as $lesson)
+                                <div class="flex justify-between items-center py-2.5 border-b border-white/[0.02] text-xs">
+                                    <span class="text-white/80">Lección: {{ $lesson->title }}</span>
+                                    <span class="text-[10px] font-bold" :class="{{ $course->is_completed ? 'true' : 'false' }} ? 'text-brand-success' : 'text-brand-accent'">
+                                        {{ $course->is_completed ? '✓ Completada' : '⏱️ Pendiente' }}
+                                    </span>
+                                </div>
                             @endforeach
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @empty
+            <p class="text-brand-text-muted text-sm text-center py-10">Aún no estás inscrito en ningún curso. ¡Ve al catálogo!</p>
+        @endforelse
+    </div>
+
+    <!-- 2. TAB: MI RENDIMIENTO -->
+    <div x-show="activeTab === 'stats'" class="hidden" :class="activeTab === 'stats' ? '!block' : ''">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            <div class="bg-brand-dark2 border border-white/5 p-6 rounded-2xl shadow-xl">
+                <div class="text-[10px] text-brand-text-muted font-bold uppercase tracking-wider">Promedio Global</div>
+                <div class="text-3xl font-black text-brand-success mt-2 font-display leading-none">{{ $avgGrade }}%</div>
+            </div>
+            <div class="bg-brand-dark2 border border-white/5 p-6 rounded-2xl shadow-xl">
+                <div class="text-[10px] text-brand-text-muted font-bold uppercase tracking-wider">Cursos Adquiridos</div>
+                <div class="text-3xl font-black text-white mt-2 font-display leading-none">{{ count($enrolledCourses) }}</div>
+            </div>
+        </div>
+        
+        <!-- Curve Chart -->
+        <div class="bg-brand-dark2 border border-white/5 rounded-2xl p-6 h-[320px] flex flex-col shadow-xl">
+            <h3 class="text-white font-bold text-sm mb-4">📈 Curva de Aprendizaje</h3>
+            <div class="flex-grow relative w-full h-full">
+                <canvas id="grafica-progreso-alumno"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. TAB: MIS LOGROS -->
+    <div x-show="activeTab === 'logros'" class="hidden" :class="activeTab === 'logros' ? '!block' : ''">
+        <div class="bg-brand-dark2 border border-white/5 rounded-2xl p-6 sm:p-8 shadow-xl">
+            <h3 class="text-white font-display font-black text-base uppercase tracking-wider mb-6">🏆 Vitrina de Prestigio</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <template x-for="logro in getAchievementsList()">
+                    <div :class="logro.unlocked ? 'bg-brand-accent/5 border border-brand-accent/30' : 'bg-white/[0.01] border border-dashed border-white/10'" 
+                         class="rounded-2xl p-5 flex gap-4 items-center relative transition-all duration-300 shadow-xl">
+                        
+                        <span class="absolute top-3 right-3 text-xs opacity-50" x-show="!logro.unlocked">🔒</span>
+                        <div class="text-3xl" :class="!logro.unlocked && 'filter grayscale opacity-30'" x-text="logro.icon"></div>
+                        
+                        <div class="w-full">
+                            <h4 class="text-white text-xs sm:text-sm font-bold mb-1" :class="!logro.unlocked && 'opacity-40'" x-text="logro.title"></h4>
+                            <p class="text-brand-text-muted text-[10px] leading-relaxed mb-2.5" :class="!logro.unlocked && 'opacity-40'" x-text="logro.desc"></p>
+                            <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                                <div :style="'width:' + logro.progress + '%;'" class="bg-brand-accent h-full rounded-full"></div>
+                            </div>
                         </div>
                     </div>
-                @endforeach
+                </template>
             </div>
         </div>
-  
-        <!-- 2. TAB: MI RENDIMIENTO -->
-        <div x-show="activeTab === 'stats'" style="display: none;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 20px;">
-                <div style="background: var(--dark2); border: 1px solid var(--border); padding: 20px; border-radius: 14px;">
-                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Promedio Global</div>
-                    <div style="font-size: 28px; font-weight: 800; color: var(--success); margin-top: 5px;">{{ $avgGrade }}%</div>
-                </div>
-                <div style="background: var(--dark2); border: 1px solid var(--border); padding: 20px; border-radius: 14px;">
-                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Cursos Adquiridos</div>
-                    <div style="font-size: 28px; font-weight: 800; color: white; margin-top: 5px;">{{ count($enrolledCourses) }}</div>
-                </div>
-            </div>
+    </div>
+
+    <!-- 4. TAB: ALERTAS / NOTIFICACIONES -->
+    <div x-show="activeTab === 'notif'" class="hidden" :class="activeTab === 'notif' ? '!block' : ''">
+        <div class="bg-brand-dark2 border border-white/5 rounded-2xl p-6 sm:p-8 shadow-xl">
+            <h3 class="text-white font-display font-black text-base uppercase tracking-wider mb-6">🔔 Mensajes del Sistema</h3>
             
-            <!-- Curve Chart -->
-            <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03); border-radius: 16px; padding: 30px; height: 300px; display: flex; flex-direction: column;">
-                <h3 style="color: white; font-size: 16px; margin-bottom: 20px;">📈 Curva de Aprendizaje</h3>
-                <div style="flex: 1; position: relative; width: 100%; height: 100%;">
-                    <canvas id="grafica-progreso-alumno"></canvas>
-                </div>
-            </div>
-        </div>
-  
-        <!-- 3. TAB: MIS LOGROS -->
-        <div x-show="activeTab === 'logros'" style="display: none;">
-            <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03); border-radius: 16px; padding: 30px;">
-                <h3 style="color: white; font-size: 18px; font-weight: 700; margin-bottom: 24px;">🏆 Vitrina de Prestigio</h3>
-                
-                <!-- Achievements list calculated dynamically based on achievements data -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-                    <template x-for="logro in getAchievementsList()">
-                        <div :style="logro.unlocked ? 'background: rgba(41,171,255,0.08); border: 1px solid var(--accent);' : 'background: rgba(255,255,255,0.01); border: 1px dashed rgba(255,255,255,0.1);'" 
-                             style="border-radius: 12px; padding: 16px; display: flex; gap: 14px; align-items: center; position:relative; transition: 0.3s;">
-                            
-                            <span style="position:absolute; top:8px; right:8px; font-size:10px;" x-show="!logro.unlocked">🔒</span>
-                            <div style="font-size: 32px;" :style="!logro.unlocked && 'filter: grayscale(100%); opacity: 0.5;'" x-text="logro.icon"></div>
-                            
-                            <div style="width: 100%;">
-                                <h4 style="color: var(--white); font-size: 14px; font-weight:700; margin-bottom: 4px;" :style="!logro.unlocked && 'opacity:0.4;'" x-text="logro.title"></h4>
-                                <p style="color: var(--text-muted); font-size: 11px; line-height: 1.4; margin-bottom: 8px;" :style="!logro.unlocked && 'opacity:0.4;'" x-text="logro.desc"></p>
-                                <div style="width:100%; background:rgba(255,255,255,0.05); height:6px; border-radius:10px; overflow:hidden;">
-                                    <div :style="'width:' + logro.progress + '%;'" style="background:var(--accent); height:100%; border-radius:10px;"></div>
-                                </div>
-                            </div>
+            <div class="flex flex-col gap-4">
+                @forelse($notifications as $notif)
+                    <div id="notif-box-{{ $notif->id }}" class="p-5 rounded-2xl border flex justify-between items-start gap-4 relative shadow-md"
+                         :style="'background: ' + getNotifBg('{{ $notif->type }}')">
+                        <div class="flex-grow">
+                            <h4 class="text-white text-sm font-bold mb-1">{{ $notif->title }}</h4>
+                            <p class="text-white/80 text-xs leading-relaxed">{{ $notif->message }}</p>
+                            <small class="text-brand-text-muted text-[9px] block mt-2.5">{{ $notif->created_at->format('d/m/Y H:i') }}</small>
                         </div>
-                    </template>
-                </div>
+                        <button @click="deleteNotification('{{ $notif->id }}')" class="bg-none border-none text-brand-text-muted hover:text-white cursor-pointer text-sm">✕</button>
+                    </div>
+                @empty
+                    <p class="text-brand-text-muted text-sm text-center py-6">No tienes alertas en tu bandeja de entrada.</p>
+                @endforelse
             </div>
         </div>
-  
-        <!-- 4. TAB: ALERTAS / NOTIFICACIONES -->
-        <div x-show="activeTab === 'notif'" style="display: none;">
-            <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03); border-radius: 16px; padding: 30px;">
-                <h3 style="color: white; font-size: 18px; font-weight: 700; margin: 0 0 24px 0;">🔔 Mensajes del Sistema</h3>
-                
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    @forelse($notifications as $notif)
-                        <div id="notif-box-{{ $notif->id }}" style="padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; position:relative;"
-                             :style="'background: ' + getNotifBg('{{ $notif->type }}')">
-                            <div>
-                                <h4 style="color: white; font-size: 14px; margin-bottom: 4px; font-weight: 700;">{{ $notif->title }}</h4>
-                                <p style="color: var(--white80); font-size: 12px; line-height: 1.5;">{{ $notif->message }}</p>
-                                <small style="color: var(--text-muted); font-size: 10px; margin-top: 8px; display: block;">{{ $notif->created_at->format('d/m/Y H:i') }}</small>
-                            </div>
-                            <button @click="deleteNotification('{{ $notif->id }}')" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px;">✕</button>
-                        </div>
-                    @empty
-                        <p style="color:var(--text-muted); font-size:13px;">No tienes alertas en tu bandeja de entrada.</p>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-    </div> 
+    </div>
 
     <!-- Edit Profile Settings Modal -->
-    <div class="modal-overlay" id="config-perfil-modal" style="display: none; z-index: 9999;">
-        <div class="modal-box" style="background: #121214; border: 1px solid var(--border); width: 100%; max-width: 400px; border-radius: 16px; padding: 24px; position: relative;">
-            <button @click="closeConfigModal()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
-            <h2 style="color: white; font-size: 18px; font-weight: 800; margin-bottom: 20px;">⚙️ Editar Perfil</h2>
+    <div class="fixed inset-0 bg-brand-dark/85 backdrop-blur-md flex items-center justify-center z-[99999] transition-all duration-300" x-show="configModalOpen" x-transition class="hidden" :class="configModalOpen ? '!flex' : 'hidden'">
+        <div class="bg-brand-dark2 border border-white/10 w-full max-w-md rounded-2xl p-8 relative shadow-2xl mx-6" @click.outside="configModalOpen = false">
+            <button @click="configModalOpen = false" class="absolute top-4 right-4 text-white/50 hover:text-white text-lg cursor-pointer">✕</button>
+            <h2 class="text-white font-display font-black text-lg mb-6">⚙️ Editar Perfil</h2>
             
-            <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
                 @csrf
-                <div class="form-group">
-                    <label class="form-label">Nombre Completo</label>
-                    <input type="text" name="name" value="{{ $user->name }}" class="form-input" required>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-white/70">Nombre Completo</label>
+                    <input type="text" name="name" value="{{ $user->name }}" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:border-brand-accent focus:outline-none" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Teléfono / WhatsApp</label>
-                    <input type="text" name="phone" value="{{ $user->phone }}" class="form-input" required>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-white/70">Teléfono / WhatsApp</label>
+                    <input type="text" name="phone" value="{{ $user->phone }}" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:border-brand-accent focus:outline-none" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">País</label>
-                    <input type="text" name="country" value="{{ $user->country }}" class="form-input" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Subir Foto de Perfil</label>
-                    <input type="file" name="foto" accept="image/*" class="form-input" style="padding: 8px; background: rgba(255,255,255,0.05); cursor:pointer;">
-                    <small style="color:var(--text-muted); font-size:10px;">La imagen se guardará en tu cuenta.</small>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-white/70">País</label>
+                    <input type="text" name="country" value="{{ $user->country }}" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:border-brand-accent focus:outline-none" required>
                 </div>
                 
-                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">* El correo electrónico principal no puede modificarse desde aquí por seguridad.</p>
-                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">💾 Guardar Cambios</button>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-white/70">Subir Foto de Perfil</label>
+                    <input type="file" name="foto" accept="image/*" class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white focus:border-brand-accent focus:outline-none cursor-pointer">
+                    <small class="text-brand-text-muted text-[10px]">La imagen se guardará en tu cuenta.</small>
+                </div>
+                
+                <p class="text-[10px] text-brand-text-muted leading-relaxed">* El correo electrónico principal no puede modificarse desde aquí por seguridad.</p>
+                <button type="submit" class="w-full bg-brand-accent hover:bg-brand-accent/90 text-white font-bold py-3 rounded-lg text-sm transition-all shadow-neon-blue cursor-pointer">💾 Guardar Cambios</button>
             </form>
         </div>
     </div>
@@ -215,6 +209,7 @@
             activeTab: 'ruta',
             chartLoaded: false,
             chartInstance: null,
+            configModalOpen: false,
 
             getMembershipName() {
                 const membership = '{{ $user->membership }}'.toLowerCase();
@@ -242,16 +237,8 @@
             toggleAccordion(idx) {
                 const el = document.getElementById('accordion-' + idx);
                 if (el) {
-                    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+                    el.classList.toggle('hidden');
                 }
-            },
-
-            openConfigModal() {
-                document.getElementById('config-perfil-modal').style.display = 'flex';
-            },
-
-            closeConfigModal() {
-                document.getElementById('config-perfil-modal').style.display = 'none';
             },
 
             getNotifBg(type) {
@@ -299,8 +286,8 @@
                         datasets: [{
                             label: 'Nota Obtenida (%)',
                             data: data.length > 0 ? data : [0],
-                            borderColor: '#29ABFF',
-                            backgroundColor: 'rgba(41, 171, 255, 0.1)',
+                            borderColor: '#0052ff',
+                            backgroundColor: 'rgba(0, 82, 255, 0.05)',
                             borderWidth: 3,
                             fill: true,
                             tension: 0.4
@@ -321,7 +308,6 @@
             },
 
             getAchievementsList() {
-                // Return 12 accomplishments config checked dynamically
                 const userMembership = '{{ $user->membership }}'.toLowerCase();
                 const totalBought = {{ count($enrolledCourses) }};
                 const totalEvaluations = {{ $totalQuizzes }};

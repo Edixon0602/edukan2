@@ -3,174 +3,181 @@
 @section('title', $course->title . ' — Reproductor LMS')
 
 @section('content')
-<div id="section-player" class="page-section visible" style="padding-top: 40px;" x-data="lmsPlayer()">
-    <div class="section-wrapper">
-        <!-- Header -->
-        <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
-            <a href="{{ route('courses.index') }}" class="btn btn-ghost btn-sm" style="text-decoration: none;">← Volver</a>
-            <div>
-                <div style="font-size:18px; font-weight:700;" x-text="courseTitle">Cargando Clase...</div>
-            </div>
+<div class="max-w-6xl mx-auto px-6 py-10" x-data="lmsPlayer()">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{{ route('courses.index') }}" wire:navigate class="bg-white/5 text-white/70 hover:bg-white/10 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition-all no-underline cursor-pointer">
+            ← Volver
+        </a>
+        <div>
+            <h2 class="font-display font-black text-xl text-white tracking-tight" x-text="courseTitle">Cargando Clase...</h2>
         </div>
-        
-        <!-- Player layout -->
-        <div class="player-layout">
-            <div>
-                <!-- Video Screen -->
-                <div class="video-player" style="position:relative; width:100%; height:0; padding-bottom:56.25%; background:#000; border-radius:12px; overflow:hidden;">
-                    <div x-show="!currentVideoUrl" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                        <div style="font-size:72px;">🤖</div>
-                        <p style="color:var(--text-muted); margin-top: 15px;">Selecciona una lección para comenzar</p>
-                    </div>
-                    <template x-if="currentVideoUrl">
-                        <iframe :src="currentVideoUrl" style="position:absolute; inset:0; width:100%; height:100%; border:none;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                    </template>
+    </div>
+    
+    <!-- Player layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+        <!-- Video & Tab content block -->
+        <div>
+            <!-- Video Screen -->
+            <div class="aspect-video w-full bg-black rounded-2xl overflow-hidden relative border border-white/5 shadow-2xl">
+                <div x-show="!currentVideoUrl" class="absolute inset-0 flex flex-col items-center justify-center bg-brand-dark2">
+                    <div class="text-6xl mb-4">🤖</div>
+                    <p class="text-brand-text-muted text-sm font-semibold">Selecciona una lección para comenzar</p>
+                </div>
+                <template x-if="currentVideoUrl">
+                    <iframe :src="currentVideoUrl" class="absolute inset-0 w-full h-full border-none" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </template>
+            </div>
+            
+            <!-- Player Sub-tabs Navigation -->
+            <div class="mt-8">
+                <!-- Tabs bar -->
+                <div class="flex gap-1.5 bg-brand-dark2 border border-white/5 p-1 rounded-full w-fit mb-6 flex-wrap">
+                    <button :class="activeTab === 'desc' ? 'bg-brand-accent text-white shadow-neon-blue' : 'text-white/60 hover:text-white'" class="px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer" @click="activeTab = 'desc'">Descripción</button>
+                    <button :class="activeTab === 'comments' ? 'bg-brand-accent text-white shadow-neon-blue' : 'text-white/60 hover:text-white'" class="px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer" @click="activeTab = 'comments'">💬 Soporte VIP</button>
+                    <button :class="activeTab === 'quiz' ? 'bg-brand-accent text-white shadow-neon-blue' : 'text-white/60 hover:text-white'" class="px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer" @click="openQuizTab()">📝 Evaluación</button>
+                    <button :class="activeTab === 'resources' ? 'bg-brand-accent text-white shadow-neon-blue' : 'text-white/60 hover:text-white'" class="px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer" @click="activeTab = 'resources'">📎 Recursos</button>
                 </div>
                 
-                <!-- Player Sub-tabs Navigation -->
-                <div style="margin-top:24px;">
-                    <div style="display:flex; gap:4px; background:var(--dark2); border:1px solid var(--border); border-radius:12px; padding:4px; width:fit-content; margin-bottom:24px; flex-wrap: wrap;">
-                        <div :class="{ 'active': activeTab === 'desc' }" class="admin-tab" @click="activeTab = 'desc'">Descripción</div>
-                        <div :class="{ 'active': activeTab === 'comments' }" class="admin-tab" @click="activeTab = 'comments'">💬 Soporte VIP</div>
-                        <div :class="{ 'active': activeTab === 'quiz' }" class="admin-tab" @click="openQuizTab()">📝 Evaluación</div>
-                        <div :class="{ 'active': activeTab === 'resources' }" class="admin-tab" @click="activeTab = 'resources'">📎 Recursos</div>
+                <!-- Tab contents -->
+                <div class="bg-brand-dark2 border border-white/5 p-6 rounded-2xl min-h-[150px]">
+                    <div x-show="activeTab === 'desc'">
+                        <p class="text-brand-text-muted text-sm sm:text-base leading-relaxed" x-text="lessonDescription || 'No hay descripción disponible para esta lección.'"></p>
                     </div>
                     
-                    <!-- Tab contents -->
-                    <div id="player-desc" class="content-card" x-show="activeTab === 'desc'" style="display:block;">
-                        <p x-text="lessonDescription || 'No hay descripción disponible para esta lección.'"></p>
-                    </div>
-                    
-                    <div id="player-comments" class="content-card" x-show="activeTab === 'comments'" style="display:none;">
-                        <h3>💬 Canal de Soporte Privado</h3>
-                        <p style="margin-bottom: 15px;">Si tienes dudas sobre esta lección, conéctate directamente con nuestro equipo de mentores vía WhatsApp.</p>
-                        <a href="https://wa.me/584245318103" target="_blank" class="btn btn-success" style="text-decoration: none; display: inline-block;">
+                    <div x-show="activeTab === 'comments'" class="flex flex-col gap-4">
+                        <h3 class="font-display font-black text-base text-white">💬 Canal de Soporte Privado</h3>
+                        <p class="text-brand-text-muted text-xs sm:text-sm leading-relaxed">
+                            Si tienes dudas sobre esta lección o necesitas destrabar tu código, conéctate directamente con nuestro equipo de mentores vía WhatsApp.
+                        </p>
+                        <a href="https://wa.me/584245318103" target="_blank" class="bg-[#25d366] hover:bg-[#25d366]/90 text-black text-xs font-bold px-4 py-2.5 rounded-lg no-underline inline-block shadow-md w-fit">
                             🟢 Abrir Chat de Profesor
                         </a>
                     </div>
                     
-                    <div id="player-quiz" class="content-card" x-show="activeTab === 'quiz'" style="display:none;">
+                    <div x-show="activeTab === 'quiz'">
                         <!-- Quizzes evaluated dynamically -->
                         <div x-show="quizCompleted">
-                            <div style="text-align:center; padding:30px; background:rgba(57, 84, 68, 0.05); border:1px solid rgba(46,204,113,0.3); border-radius:12px;">
-                                <h2 style="color:#2ecc71; margin-bottom: 10px;">✅ Evaluación Completada</h2>
-                                <p style="color:white; font-size: 14px;">Ya realizaste este examen y tu calificación final es de <b style="font-size: 18px; color: #2ecc71;" x-text="quizGrade + '%'"></b>.</p>
+                            <div class="text-center p-6 bg-brand-success/5 border border-brand-success/30 rounded-xl">
+                                <h3 class="text-brand-success font-bold text-lg mb-2">✅ Evaluación Completada</h3>
+                                <p class="text-white text-xs sm:text-sm">Ya realizaste este examen y tu calificación final es de <b class="text-brand-success font-display font-black text-lg" x-text="quizGrade + '%'"></b>.</p>
                             </div>
                         </div>
                         
                         <div x-show="!quizCompleted && !hasQuizzes">
-                            <p style="color:var(--text-muted);">Este módulo no tiene una evaluación configurada.</p>
+                            <p class="text-brand-text-muted text-sm">Este módulo no tiene una evaluación configurada.</p>
                         </div>
                         
                         <div x-show="!quizCompleted && hasQuizzes">
-                            <h3>📝 Evaluación Obligatoria</h3>
-                            <form @submit.prevent="submitQuiz()" id="quiz-submission-form">
+                            <h3 class="font-display font-black text-base text-white mb-4">📝 Evaluación Obligatoria</h3>
+                            <form @submit.prevent="submitQuiz()" id="quiz-submission-form" class="flex flex-col gap-4">
                                 <template x-for="(q, idx) in currentQuizzes" :key="q.id">
-                                    <div style="margin-top:20px; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                                        <b x-text="(idx + 1) + '. ' + q.question"></b>
+                                    <div class="bg-white/[0.01] border border-white/5 p-5 rounded-xl flex flex-col gap-3">
+                                        <b class="text-sm text-white" x-text="(idx + 1) + '. ' + q.question"></b>
                                         
                                         <!-- Selection option -->
                                         <template x-if="q.type === 'seleccion'">
-                                            <div style="margin-top: 10px;">
-                                                <label style="display:block; margin: 6px 0;"><input type="radio" :name="'question_' + q.id" value="A" required> A) <span x-text="q.options.A"></span></label>
-                                                <label style="display:block; margin: 6px 0;"><input type="radio" :name="'question_' + q.id" value="B" required> B) <span x-text="q.options.B"></span></label>
+                                            <div class="flex flex-col gap-2 text-xs sm:text-sm text-white/80">
+                                                <label class="flex items-center gap-2.5 cursor-pointer"><input type="radio" :name="'question_' + q.id" value="A" required class="accent-brand-accent"> A) <span x-text="q.options.A"></span></label>
+                                                <label class="flex items-center gap-2.5 cursor-pointer"><input type="radio" :name="'question_' + q.id" value="B" required class="accent-brand-accent"> B) <span x-text="q.options.B"></span></label>
                                             </div>
                                         </template>
-
+                                        
                                         <!-- True or False option -->
                                         <template x-if="q.type === 'verdadero_falso'">
-                                            <div style="margin-top: 10px;">
-                                                <label style="display:block; margin: 6px 0;"><input type="radio" :name="'question_' + q.id" value="Verdadero" required> Verdadero</label>
-                                                <label style="display:block; margin: 6px 0;"><input type="radio" :name="'question_' + q.id" value="Falso" required> Falso</label>
+                                            <div class="flex flex-col gap-2 text-xs sm:text-sm text-white/80">
+                                                <label class="flex items-center gap-2.5 cursor-pointer"><input type="radio" :name="'question_' + q.id" value="Verdadero" required class="accent-brand-accent"> Verdadero</label>
+                                                <label class="flex items-center gap-2.5 cursor-pointer"><input type="radio" :name="'question_' + q.id" value="Falso" required class="accent-brand-accent"> Falso</label>
                                             </div>
                                         </template>
 
                                         <!-- Written answer option -->
                                         <template x-if="q.type === 'desarrollo'">
-                                            <div style="margin-top: 10px;">
-                                                <textarea :name="'question_' + q.id" style="width:100%; height:80px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px; resize: none;" required placeholder="Escribe tu respuesta detalladamente..."></textarea>
+                                            <div class="mt-1">
+                                                <textarea :name="'question_' + q.id" class="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-3 text-white text-xs sm:text-sm focus:border-brand-accent focus:outline-none resize-none" required placeholder="Escribe tu respuesta detalladamente..."></textarea>
                                             </div>
                                         </template>
                                     </div>
                                 </template>
-                                <button type="submit" class="btn btn-primary" style="margin-top:20px; width:100%; justify-content:center;">
+                                <button type="submit" class="w-full bg-brand-accent hover:bg-brand-accent/90 text-white font-bold py-3 rounded-lg text-sm transition-all shadow-neon-blue mt-4 cursor-pointer">
                                     🚀 Enviar Respuestas Definitivas
                                 </button>
                             </form>
                         </div>
                     </div>
                     
-                    <div id="player-resources" class="content-card" x-show="activeTab === 'resources'" style="display:none;">
-                        <h3>📎 Recursos de Descarga</h3>
-                        <ul style="list-style: none; padding: 0; margin-top: 15px;" x-show="lessonResources && lessonResources.length > 0">
+                    <div x-show="activeTab === 'resources'">
+                        <h3 class="font-display font-black text-base text-white mb-4">📎 Recursos de Descarga</h3>
+                        <ul class="list-none p-0 flex flex-col gap-2.5 text-xs sm:text-sm" x-show="lessonResources && lessonResources.length > 0">
                             <template x-for="res in lessonResources">
-                                <li style="margin-bottom:10px;">
-                                    <a :href="res.url" target="_blank" style="color:var(--accent); font-weight:600; text-decoration:none;" x-text="'🔗 ' + res.name"></a>
+                                <li>
+                                    <a :href="res.url" target="_blank" class="text-brand-accent font-bold hover:underline no-underline" x-text="'🔗 ' + res.name"></a>
                                 </li>
                             </template>
                         </ul>
-                        <p x-show="!lessonResources || lessonResources.length === 0" style="color:var(--text-muted);">No hay recursos adjuntos para esta lección.</p>
+                        <p x-show="!lessonResources || lessonResources.length === 0" class="text-brand-text-muted text-sm">No hay recursos adjuntos para esta lección.</p>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Sidebar Navigation (Curriculum) -->
-            <div class="curriculum-panel">
-                <div class="curriculum-header">📚 Módulos del Curso</div>
-                @foreach($course->modules as $modIdx => $mod)
-                    <div style="padding:10px 8px; color:var(--accent); font-weight:700; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.04);">
-                        {{ $mod->title }}
-                    </div>
-                    @foreach($mod->lessons as $lessonIdx => $lesson)
-                        <div :class="{ 'active': currentLessonId === {{ $lesson->id }} }" class="module-item" style="padding:10px 15px; cursor:pointer; font-size:13px; color:white; transition: var(--transition);" 
-                             @click="playLesson({{ $lesson->id }}, '{{ $lesson->title }}', '{{ $lesson->video_url }}', '{{ $lesson->description }}', {{ json_encode($lesson->resources) }}, {{ $mod->id }}, '{{ $mod->title }}')">
-                            ▶️ {{ $lesson->title }}
-                        </div>
-                    @endforeach
-                @endforeach
             </div>
         </div>
+        
+        <!-- Sidebar Navigation (Curriculum) -->
+        <div class="bg-brand-dark2 border border-white/5 rounded-2xl overflow-hidden shadow-xl h-fit">
+            <div class="bg-white/5 px-5 py-4 font-display font-black text-xs uppercase tracking-wider text-white border-b border-white/5">📚 Módulos del Curso</div>
+            @foreach($course->modules as $modIdx => $mod)
+                <div class="px-5 py-3 font-display font-bold text-xs text-[#00f2fe] bg-white/[0.01] border-b border-white/5">
+                    {{ $mod->title }}
+                </div>
+                @foreach($mod->lessons as $lessonIdx => $lesson)
+                    <div :class="currentLessonId === {{ $lesson->id }} ? 'bg-brand-accent/15 text-white border-l-2 border-brand-accent' : 'text-white/70 hover:bg-white/[0.02] hover:text-white border-white/[0.02]'" 
+                         class="px-6 py-3 cursor-pointer text-xs transition-all border-b flex items-center gap-2" 
+                         @click="playLesson({{ $lesson->id }}, '{{ $lesson->title }}', '{{ $lesson->video_url }}', '{{ $lesson->description }}', {{ json_encode($lesson->resources) }}, {{ $mod->id }}, '{{ $mod->title }}')">
+                        ▶️ {{ $lesson->title }}
+                    </div>
+                @endforeach
+            @endforeach
+        </div>
+    </div>
 
-        <!-- Student Reviews Panel -->
-        <div id="curso-reviews-wrapper" style="margin-top: 40px; background: rgba(255,255,255,0.01); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);" x-data="reviewsEngine('{{ $course->id }}')">
-            <h3 style="color: white; font-size: 20px; margin-bottom: 20px;">⭐ Opiniones de los Estudiantes</h3>
-        
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                <h2 style="font-size: 48px; color: white; margin: 0; font-weight: 900; letter-spacing: -2px;" x-text="avgRating">0.0</h2>
-                <div>
-                    <div style="color: #FFD700; font-size: 22px; letter-spacing: 2px;" x-text="getStarsDisplay(avgRating)"></div>
-                    <p style="color: var(--text-muted); font-size: 13px; margin: 5px 0 0 0; font-weight: 600;" x-text="totalReviews + ' valoraciones'"></p>
-                </div>
+    <!-- Student Reviews Panel -->
+    <div class="mt-10 bg-brand-dark2/40 border border-white/5 p-6 sm:p-8 rounded-2xl shadow-xl" x-data="reviewsEngine('{{ $course->id }}')">
+        <h3 class="font-display font-black text-lg text-white mb-6">⭐ Opiniones de los Estudiantes</h3>
+    
+        <div class="flex items-center gap-4 mb-8">
+            <h2 class="font-display font-black text-5xl text-white tracking-tighter" x-text="avgRating">0.0</h2>
+            <div>
+                <div class="text-brand-gold text-xl tracking-wide leading-none" x-text="getStarsDisplay(avgRating)"></div>
+                <p class="text-brand-text-muted text-xs font-bold mt-1.5" x-text="totalReviews + ' valoraciones'"></p>
             </div>
-        
-            <!-- Leave a Review Form -->
-            @auth
-                <div id="form-dejar-resena" style="background: var(--dark2); padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid var(--border);">
-                    <h4 style="color: white; margin: 0 0 10px 0; font-size: 14px;">Deja tu calificación oficial:</h4>
-                    <div style="font-size: 28px; cursor: pointer; color: #444; margin-bottom: 15px; display: flex; gap: 5px;">
-                        <template x-for="star in [1,2,3,4,5]">
-                            <span :style="star <= userStars ? 'color: #FFD700;' : 'color: #444;'" @click="userStars = star">★</span>
-                        </template>
-                    </div>
-                    <textarea x-model="userComment" placeholder="¿Qué te pareció este curso? Escribe tu experiencia aquí..." style="width: 100%; height: 80px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-family: inherit; resize: none;"></textarea>
-                    <button @click="submitReview()" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">🚀 Publicar mi Opinión</button>
+        </div>
+    
+        <!-- Leave a Review Form -->
+        @auth
+            <div class="bg-brand-dark2 p-6 border border-white/5 rounded-xl mb-8">
+                <h4 class="text-white font-bold text-xs sm:text-sm mb-2">Deja tu calificación oficial:</h4>
+                <div class="flex gap-1.5 text-2xl cursor-pointer text-white/20 mb-4">
+                    <template x-for="star in [1,2,3,4,5]">
+                        <span :class="star <= userStars ? 'text-brand-gold' : 'text-white/20'" @click="userStars = star">★</span>
+                    </template>
                 </div>
-            @endauth
-        
-            <!-- Review lists -->
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <template x-for="r in reviewsList" :key="r.id">
-                    <div style="padding:15px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); border-radius:10px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:5px;">
-                            <strong style="color:white; font-size:13px;" x-text="r.user_name"></strong>
-                            <div style="color:#FFD700; font-size:12px;" x-text="getStarsDisplay(r.stars)"></div>
-                        </div>
-                        <p style="color:var(--white80); font-size:13px; line-height:1.5; font-style:italic;" x-text="'\u201c' + r.comment + '\u201d'"></p>
-                        <small style="color:var(--text-muted); font-size:10px; display:block; margin-top:8px;" x-text="r.date"></small>
-                    </div>
-                </template>
-                <p x-show="reviewsList.length === 0" style="color: var(--text-muted); font-size: 13px;">Aún no hay opiniones sobre este curso. ¡Sé el primero en dejar una!</p>
+                <textarea x-model="userComment" placeholder="¿Qué te pareció este curso? Escribe tu experiencia aquí..." class="w-full h-24 bg-white/5 border border-white/10 rounded-xl p-4 text-white text-xs sm:text-sm focus:border-brand-accent focus:outline-none resize-none mb-4 font-body"></textarea>
+                <button @click="submitReview()" class="w-full bg-brand-accent hover:bg-brand-accent/90 text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-neon-blue cursor-pointer">🚀 Publicar mi Opinión</button>
             </div>
+        @endauth
+    
+        <!-- Review lists -->
+        <div class="flex flex-col gap-4">
+            <template x-for="r in reviewsList" :key="r.id">
+                <div class="p-5 bg-white/[0.01] border border-white/5 rounded-xl">
+                    <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
+                        <strong class="text-white text-xs font-bold" x-text="r.user_name"></strong>
+                        <div class="text-brand-gold text-xs" x-text="getStarsDisplay(r.stars)"></div>
+                    </div>
+                    <p class="text-white/80 text-xs sm:text-sm leading-relaxed italic" x-text="'\u201c' + r.comment + '\u201d'"></p>
+                    <small class="text-brand-text-muted text-[10px] block mt-3" x-text="r.date"></small>
+                </div>
+            </template>
+            <p x-show="reviewsList.length === 0" class="text-brand-text-muted text-xs sm:text-sm">Aún no hay opiniones sobre este curso. ¡Sé el primero en dejar una!</p>
         </div>
     </div>
 </div>
@@ -344,8 +351,10 @@
                     this.userComment = '';
                     this.loadReviews();
                     
-                    // Reload Average stats
-                    location.reload();
+                    // Refresh parent context stats
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 })
                 .catch(() => {
                     showGlobalNotification('Error al guardar reseña.', true);

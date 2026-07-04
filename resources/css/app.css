@@ -10,6 +10,8 @@
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Orbitron', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -23,9 +25,32 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    --color-brand-accent: #0052ff;
+    --color-brand-success: #2ecc71;
+    --color-brand-dark: #090b11;
+    --color-brand-dark2: #0e111a;
+    --color-brand-gold: #ffd700;
+    --color-brand-text-muted: #8a8a93;
+    
+    --shadow-neon-blue: 0 0 15px rgba(0, 82, 255, 0.4);
+    --shadow-neon-cyan: 0 0 15px rgba(0, 242, 254, 0.4);
+    --shadow-neon-gold: 0 0 15px rgba(255, 215, 0, 0.4);
+
+    --color-accent: var(--color-brand-accent);
+    --color-accent-content: var(--color-brand-accent);
     --color-accent-foreground: var(--color-white);
+}
+
+@utility glass-card {
+    background: rgba(18, 18, 24, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@utility gradient-text {
+    background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 @layer theme {
